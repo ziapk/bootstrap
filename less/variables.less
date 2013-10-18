@@ -6,7 +6,7 @@
 // Global values
 // --------------------------------------------------
 
-// Grays
+//== Grays
 // -------------------------
 
 @gray-darker:            lighten(#000, 13.5%); // #222
@@ -15,7 +15,7 @@
 @gray-light:             lighten(#000, 60%);   // #999
 @gray-lighter:           lighten(#000, 93.5%); // #eee
 
-// Brand colors
+//== Brand colors
 // -------------------------
 
 @brand-primary:         #428bca;
@@ -24,7 +24,7 @@
 @brand-danger:          #d9534f;
 @brand-info:            #5bc0de;
 
-// Scaffolding
+//== Scaffolding
 // -------------------------
 
 //** Background color for `<body>`.
@@ -32,7 +32,7 @@
 //** Global text color on `<body>`.
 @text-color:            @gray-dark;
 
-// Links
+//== Links
 // -------------------------
 
 //** Global textual link color
@@ -40,7 +40,7 @@
 //** Link hover color set via `darken()` function
 @link-hover-color:      darken(@link-color, 15%);
 
-// Typography
+//== Typography
 // -------------------------
 
 //** Default sans-serif fonts.
@@ -71,14 +71,15 @@
 @headings-color:          inherit;
 
 
-// Iconography
+//-- Iconography
 // -------------------------
 
 @icon-font-path:          "../fonts/";
 @icon-font-name:          "glyphicons-halflings-regular";
 
 
-// Components
+//== Components
+//## Define common padding and border radius sizes and more.
 // -------------------------
 // Based on 14px font-size and 1.428 line-height (~20px to start)
 
@@ -106,7 +107,7 @@
 @caret-width-base:               4px;
 @caret-width-large:              5px;
 
-// Tables
+//== Tables
 // -------------------------
 
 //** Default padding for `<th>`s and `<td>`s
@@ -126,7 +127,8 @@
 @table-border-color:                 #ddd; // table and cell border
 
 
-// Buttons
+//== Buttons
+//## For each of Bootstrap's buttons, define text, background and border color.
 // -------------------------
 
 @btn-font-weight:                normal;
@@ -158,7 +160,7 @@
 @btn-link-disabled-color:        @gray-light;
 
 
-// Forms
+//== Forms
 // -------------------------
 
 //** `<input>` background color
@@ -194,7 +196,7 @@
 @input-group-addon-border-color: @input-border;
 
 
-// Dropdowns
+//== Dropdowns
 // -------------------------
 
 //** Dropdown menu background color
@@ -232,7 +234,7 @@
 // --------------------------------------------------
 
 
-// Z-index master list
+//-- Z-index master list
 // -------------------------
 // Used for a bird's eye view of components dependent on the z-axis
 // Try to avoid customizing these :)
@@ -245,7 +247,8 @@
 @zindex-modal-background:  1040;
 @zindex-modal:             1050;
 
-// Media queries breakpoints
+//== Media queries breakpoints
+//## Define the breakpoints at which your layout will change, adapting to different screen sizes.
 // --------------------------------------------------
 
 // Extra small screen / phone
@@ -278,7 +281,8 @@
 @screen-md-max:              (@screen-lg-min - 1);
 
 
-// Grid system
+//== Grid system
+//## Define your custom responsive grid.
 // --------------------------------------------------
 
 // Number of columns in the grid system
@@ -292,7 +296,7 @@
 @grid-float-breakpoint:     @screen-sm-min;
 
 
-// Navbar
+//== Navbar
 // -------------------------
 
 // Basics of a navbar
@@ -353,7 +357,7 @@
 @navbar-inverse-toggle-border-color:        #333;
 
 
-// Navs
+//== Navs
 // -------------------------
 
 @nav-link-padding:                          10px 15px;
@@ -365,7 +369,7 @@
 @nav-open-link-hover-color:                 #fff;
 @nav-open-caret-border-color:               #fff;
 
-// Tabs
+//== Tabs
 @nav-tabs-border-color:                     #ddd;
 
 @nav-tabs-link-hover-border-color:          @gray-lighter;
@@ -377,13 +381,13 @@
 @nav-tabs-justified-link-border-color:            #ddd;
 @nav-tabs-justified-active-link-border-color:     @body-bg;
 
-// Pills
+//== Pills
 @nav-pills-border-radius:                   @border-radius-base;
 @nav-pills-active-link-hover-bg:            @component-active-bg;
 @nav-pills-active-link-hover-color:         @component-active-color;
 
 
-// Pagination
+//== Pagination
 // -------------------------
 
 //** Background color
@@ -403,7 +407,7 @@
 @pagination-disabled-color:            @gray-light;
 
 
-// Pager
+//== Pager
 // -------------------------
 
 //** Pager border radius
@@ -412,7 +416,7 @@
 @pager-disabled-color:                 @gray-light;
 
 
-// Jumbotron
+//== Jumbotron
 // -------------------------
 
 @jumbotron-padding:              30px;
@@ -422,7 +426,8 @@
 @jumbotron-font-size:            ceil(@font-size-base * 1.5);
 
 
-// Form states and alerts
+//== Form states and alerts
+//## Define colors for form feedback states and, by default, alerts.
 // -------------------------
 
 @state-success-text:             #468847;
@@ -442,7 +447,7 @@
 @state-danger-border:            darken(spin(@state-danger-bg, -10), 5%);
 
 
-// Tooltips
+//== Tooltips
 // -------------------------
 //** Tooltip max width
 @tooltip-max-width:           200px;
@@ -457,7 +462,7 @@
 @tooltip-arrow-color:         @tooltip-bg;
 
 
-// Popovers
+//== Popovers
 // -------------------------
 //** Popover body background color
 @popover-bg:                          #fff;
@@ -484,7 +489,7 @@
 @popover-arrow-outer-fallback-color:  #999;
 
 
-// Labels
+//== Labels
 // -------------------------
 
 //** Default label background color
@@ -506,7 +511,7 @@
 @label-link-hover-color:      #fff;
 
 
-// Modals
+//== Modals
 // -------------------------
 //** Padding applied to the modal body
 @modal-inner-padding:         20px;
@@ -531,7 +536,8 @@
 @modal-footer-border-color:   @modal-header-border-color;
 
 
-// Alerts
+//== Alerts
+//## Define alert colors, border radius, and padding.
 // -------------------------
 @alert-padding:               15px;
 @alert-border-radius:         @border-radius-base;
@@ -554,7 +560,7 @@
 @alert-danger-border:         @state-danger-border;
 
 
-// Progress bars
+//== Progress bars
 // -------------------------
 //** Background color of the whole progress component
 @progress-bg:                 #f5f5f5;
@@ -573,7 +579,7 @@
 @progress-bar-info-bg:        @brand-info;
 
 
-// List group
+//== List group
 // -------------------------
 //** Background color on `.list-group-item`
 @list-group-bg:               #fff;
@@ -595,7 +601,7 @@
 @list-group-link-heading-color:  #333;
 
 
-// Panels
+//== Panels
 // -------------------------
 @panel-bg:                    #fff;
 //** Border color for elements within panels
@@ -628,7 +634,7 @@
 @panel-info-heading-bg:       @state-info-bg;
 
 
-// Thumbnails
+//== Thumbnails
 // -------------------------
 //** Padding around the thumbnail image
 @thumbnail-padding:           4px;
@@ -645,12 +651,12 @@
 @thumbnail-caption-padding:   9px;
 
 
-// Wells
+//== Wells
 // -------------------------
 @well-bg:                     #f5f5f5;
 
 
-// Badges
+//== Badges
 // -------------------------
 @badge-color:                 #fff;
 //** Linked badge text color on hover
@@ -667,7 +673,7 @@
 @badge-border-radius:         10px;
 
 
-// Breadcrumbs
+//== Breadcrumbs
 // -------------------------
 //** Breadcrumb background color
 @breadcrumb-bg:               #f5f5f5;
@@ -679,7 +685,7 @@
 @breadcrumb-separator:        "/";
 
 
-// Carousel
+//== Carousel
 // ------------------------
 
 @carousel-text-shadow:                        0 1px 2px rgba(0,0,0,.6);
@@ -695,14 +701,14 @@
 @carousel-caption-color:                      #fff;
 
 
-// Close
+//== Close
 // ------------------------
 @close-font-weight:           bold;
 @close-color:                 #000;
 @close-text-shadow:           0 1px 0 #fff;
 
 
-// Code
+//== Code
 // ------------------------
 @code-color:                  #c7254e;
 @code-bg:                     #f9f2f4;
@@ -712,7 +718,7 @@
 @pre-border-color:            #ccc;
 @pre-scrollable-max-height:   340px;
 
-// Type
+//== Type
 // ------------------------
 //** Text muted color
 @text-muted:                  @gray-light;
@@ -727,7 +733,7 @@
 //** Page header border color
 @page-header-border-color:    @gray-lighter;
 
-// Miscellaneous
+//== Miscellaneous
 // -------------------------
 
 // Hr border color
@@ -739,7 +745,8 @@
 @component-offset-horizontal: 180px;
 
 
-// Container sizes
+//== Container sizes
+//## Define the maximum width of `.container` for different screen sizes.
 // --------------------------------------------------
 
 // Small screen / tablet

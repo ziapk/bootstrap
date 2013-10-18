@@ -136,6 +136,18 @@ module.exports = function(grunt) {
         options: {
           pretty: true,
           data: function (dest, src) {
+            /*
+            Mini-language:
+              //== This is a normal heading, which starts a section. Sections group variables together.
+              //## Optional description for the heading
+
+              //** Optional description for the following variable. You **can** use Markdown in descriptions to discuss `<html>` stuff.
+              @foo: #ffff;
+
+              //-- This is a heading for a section whose variables shouldn't be customizable
+
+              All other lines are ignored completely.
+            */
             var path = require('path');
             var fs = require('fs');
             var markdown = require('markdown').markdown;
@@ -143,29 +155,150 @@ module.exports = function(grunt) {
             var filePath = path.join(__dirname, 'less/variables.less');
             var lines = fs.readFileSync(filePath, {encoding: 'utf8'}).split('\n');
 
-            var docCommentPrefix = /^[/]{2}[*]{2}(.*)$/;
-            var lessVarAssignment = /^(@[a-zA-Z0-9_-]+):[ ]+([^ ;][^;]+);$/;
+            function Section(heading, customizable) {
+              this.heading = heading.trim();
+              this.customizable = customizable;
+              this.docstring = null;
+              this.variables = [];
+              this.addVar = function (variable) {
+                this.variables.push(variable);
+              };
+            }
+            function markdown2html(markdownString) {
+              // the slice removes the <p>...</p> wrapper output by Markdown processor
+              return markdown.toHTML(markdownString.trim()).slice(3, -4);
+            }
+            function VarDocstring(markdownString) {
+              this.html = markdown2html(markdownString);
+            }
+            function SectionDocstring(markdownString) {
+              this.html = markdown2html(markdownString);
+            }
+            function Variable(name, defaultValue) {
+              this.name = name;
+              this.defaultValue = defaultValue;
+              this.docstring = null;
+            }
+            function Tokenizer() {
+              var CUSTOMIZABLE_HEADING = /^[/]{2}={2}(.*)$/;
+              var UNCUSTOMIZABLE_HEADING = /^[/]{2}-{2}(.*)$/;
+              var SECTION_DOCSTRING = /^[/]{2}#{2}(.*)$/;
+              var VAR_ASSIGNMENT = /^(@[a-zA-Z0-9_-]+):[ ]*([^ ;][^;]+);[ ]*$/;
+              var VAR_DOCSTRING = /^[/]{2}[*]{2}(.*)$/;
 
-            var variables = [];
-            var descriptionHtml = null;
-            lines.forEach(function (line) {
-              var match = null;
-              match = lessVarAssignment.exec(line);
-              if (match !== null) {
-                variables.push({name: match[1], defaultValue: match[2], description: descriptionHtml});
-                descriptionHtml = null;
-                return;
-              }
-              match = docCommentPrefix.exec(line);
-              if (match !== null) {
-                // the slice removes the <p>...</p> wrapper output by Markdown processor
-                descriptionHtml = markdown.toHTML(match[1].trim()).slice(3, -4);
-                return;
-              }
-              descriptionHtml = null;
-            });
+              this._next = undefined;
+              this.unshift = function (token) {
+                if (this._next !== undefined) {
+                  throw new Error("Attempted to unshift twice!");
+                }
+                this._next = token;
+              };
+              this._shift = function () {
+                // returning null signals EOF
+                // returning undefined means the line was ignored
+                if (this._next !== undefined) {
+                  var result = this._next;
+                  this._next = undefined;
+                  return result;
+                }
+                if (lines.length <= 0) {
+                  return null;
+                }
+                var line = lines.shift();
+                var match = null;
+                match = CUSTOMIZABLE_HEADING.exec(line);
+                if (match !== null) {
+                  return new Section(match[1], true);
+                }
+                match = UNCUSTOMIZABLE_HEADING.exec(line);
+                if (match !== null) {
+                  return new Section(match[1], false);
+                }
+                match = SECTION_DOCSTRING.exec(line);
+                if (match !== null) {
+                  return new SectionDocstring(match[1]);
+                }
+                match = VAR_DOCSTRING.exec(line);
+                if (match !== null) {
+                  return new VarDocstring(match[1]);
+                }
+                var commentStart = line.lastIndexOf("//");
+                var varLine = (commentStart === -1) ? line : line.slice(0, commentStart);
+                match = VAR_ASSIGNMENT.exec(varLine);
+                if (match !== null) {
+                  return new Variable(match[1], match[2]);
+                }
+                return undefined;
+              };
+              this.shift = function () {
+                while (true) {
+                  var result = this._shift();
+                  if (result === undefined) {
+                    continue;
+                  }
+                  return result;
+                }
+              };
+            }
+            var tokenizer = new Tokenizer();
+            function Parser() {
+              this.parseFile = function () {
+                var sections = [];
+                while (true) {
+                  var section = this.parseSection();
+                  if (section === null) {
+                    if (tokenizer.shift() !== null) {
+                      throw new Error("Unexpected unparsed section of file remains!");
+                    }
+                    return sections;
+                  }
+                  sections.push(section);
+                }
+              };
+              this.parseSection = function () {
+                var section = tokenizer.shift();
+                if (section === null) {
+                  return null;
+                }
+                if (!(section instanceof Section)) {
+                  throw new Error("Expected section heading; got: " + JSON.stringify(section));
+                }
+                var docstring = tokenizer.shift();
+                if (docstring instanceof SectionDocstring) {
+                  section.docstring = docstring;
+                }
+                else {
+                  tokenizer.unshift(docstring);
+                }
+                this.parseVars(section);
+                return section;
+              };
+              this.parseVars = function (section) {
+                while (true) {
+                  var variable = this.parseVar();
+                  if (variable === null) {
+                    return;
+                  }
+                  section.addVar(variable);
+                }
+              };
+              this.parseVar = function () {
+                var docstring = tokenizer.shift();
+                if (!(docstring instanceof VarDocstring)) {
+                  tokenizer.unshift(docstring);
+                  docstring = null;
+                }
+                var variable = tokenizer.shift();
+                if (variable instanceof Variable) {
+                  variable.docstring = docstring;
+                  return variable;
+                }
+                tokenizer.unshift(variable);
+                return null;
+              };
+            }
 
-            return {variables: variables}
+            return {sections: (new Parser()).parseFile()};
           }
         },
         files: {
@@ -266,7 +399,8 @@ module.exports = function(grunt) {
   grunt.registerTask('change-version-number', ['sed']);
 
   // task for building customizer
-  grunt.registerTask('build-customizer', ['build-raw-files', 'jade']);
+  grunt.registerTask('build-customizer', ['build-customizer-vars-form', 'build-raw-files']);
+  grunt.registerTask('build-customizer-vars-form', ['jade']);
   grunt.registerTask('build-raw-files', 'Add scripts/less files to customizer.', function () {
     var fs = require('fs')
 
