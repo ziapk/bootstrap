@@ -368,7 +368,7 @@ module.exports = function(grunt) {
   grunt.registerTask('validate-html', ['jekyll', 'validation']);
 
   // Test task.
-  var testSubtasks = ['dist-css', 'jshint', 'qunit', 'validate-html'];
+  var testSubtasks = ['dist-css', 'jshint', 'qunit', 'build-customizer-vars-form', 'validate-html'];
   // Only run BrowserStack tests under Travis
   if (process.env.TRAVIS) {
     // Only run BrowserStack tests if this is a mainline commit in twbs/bootstrap, or you have your own BrowserStack key
