@@ -131,6 +131,49 @@ module.exports = function(grunt) {
       docs: {}
     },
 
+    jade: {
+      compile: {
+        options: {
+          pretty: true,
+          data: function (dest, src) {
+            var path = require('path');
+            var fs = require('fs');
+            var markdown = require('markdown').markdown;
+
+            var filePath = path.join(__dirname, 'less/variables.less');
+            var lines = fs.readFileSync(filePath, {encoding: 'utf8'}).split('\n');
+
+            var docCommentPrefix = /^[/]{2}[*]{2}(.*)$/;
+            var lessVarAssignment = /^(@[a-zA-Z0-9_-]+):[ ]+([^ ;][^;]+);$/;
+
+            var variables = [];
+            var descriptionHtml = null;
+            lines.forEach(function (line) {
+              var match = null;
+              match = lessVarAssignment.exec(line);
+              if (match !== null) {
+                variables.push({name: match[1], defaultValue: match[2], description: descriptionHtml});
+                descriptionHtml = null;
+                return;
+              }
+              match = docCommentPrefix.exec(line);
+              if (match !== null) {
+                // the slice removes the <p>...</p> wrapper output by Markdown processor
+                descriptionHtml = markdown.toHTML(match[1].trim()).slice(3, -4);
+                return;
+              }
+              descriptionHtml = null;
+            });
+
+            return {variables: variables}
+          }
+        },
+        files: {
+          '_includes/customizer-variables.html': 'customizer-variables.jade'
+        }
+      }
+    },
+
     validation: {
       options: {
         reset: true,
@@ -178,6 +221,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-jade');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -222,7 +266,8 @@ module.exports = function(grunt) {
   grunt.registerTask('change-version-number', ['sed']);
 
   // task for building customizer
-  grunt.registerTask('build-customizer', 'Add scripts/less files to customizer.', function () {
+  grunt.registerTask('build-customizer', ['build-raw-files', 'jade']);
+  grunt.registerTask('build-raw-files', 'Add scripts/less files to customizer.', function () {
     var fs = require('fs')
 
     function getFiles(type) {

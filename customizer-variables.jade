@@ -1,0 +1,9 @@
+each variable in variables
+    div
+        label= variable.name
+        input.form-control(
+            type="text"
+            placeholder=variable.defaultValue
+            data-var=variable.name)
+        if variable.description
+            p.help-block!= variable.description
