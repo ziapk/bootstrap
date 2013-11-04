@@ -180,123 +180,122 @@ module.exports = function(grunt) {
               this.docstring = null;
             }
             function Tokenizer() {
-              var CUSTOMIZABLE_HEADING = /^[/]{2}={2}(.*)$/;
-              var UNCUSTOMIZABLE_HEADING = /^[/]{2}-{2}(.*)$/;
-              var SECTION_DOCSTRING = /^[/]{2}#{2}(.*)$/;
-              var VAR_ASSIGNMENT = /^(@[a-zA-Z0-9_-]+):[ ]*([^ ;][^;]+);[ ]*$/;
-              var VAR_DOCSTRING = /^[/]{2}[*]{2}(.*)$/;
+              this.CUSTOMIZABLE_HEADING = /^[/]{2}={2}(.*)$/;
+              this.UNCUSTOMIZABLE_HEADING = /^[/]{2}-{2}(.*)$/;
+              this.SECTION_DOCSTRING = /^[/]{2}#{2}(.*)$/;
+              this.VAR_ASSIGNMENT = /^(@[a-zA-Z0-9_-]+):[ ]*([^ ;][^;]+);[ ]*$/;
+              this.VAR_DOCSTRING = /^[/]{2}[*]{2}(.*)$/;
 
               this._next = undefined;
-              this.unshift = function (token) {
-                if (this._next !== undefined) {
-                  throw new Error("Attempted to unshift twice!");
-                }
-                this._next = token;
-              };
-              this._shift = function () {
-                // returning null signals EOF
-                // returning undefined means the line was ignored
-                if (this._next !== undefined) {
-                  var result = this._next;
-                  this._next = undefined;
-                  return result;
-                }
-                if (lines.length <= 0) {
-                  return null;
-                }
-                var line = lines.shift();
-                var match = null;
-                match = CUSTOMIZABLE_HEADING.exec(line);
-                if (match !== null) {
-                  return new Section(match[1], true);
-                }
-                match = UNCUSTOMIZABLE_HEADING.exec(line);
-                if (match !== null) {
-                  return new Section(match[1], false);
-                }
-                match = SECTION_DOCSTRING.exec(line);
-                if (match !== null) {
-                  return new SectionDocstring(match[1]);
-                }
-                match = VAR_DOCSTRING.exec(line);
-                if (match !== null) {
-                  return new VarDocstring(match[1]);
-                }
-                var commentStart = line.lastIndexOf("//");
-                var varLine = (commentStart === -1) ? line : line.slice(0, commentStart);
-                match = VAR_ASSIGNMENT.exec(varLine);
-                if (match !== null) {
-                  return new Variable(match[1], match[2]);
-                }
-                return undefined;
-              };
-              this.shift = function () {
-                while (true) {
-                  var result = this._shift();
-                  if (result === undefined) {
-                    continue;
-                  }
-                  return result;
-                }
-              };
             }
-            var tokenizer = new Tokenizer();
-            function Parser() {
-              this.parseFile = function () {
-                var sections = [];
-                while (true) {
-                  var section = this.parseSection();
-                  if (section === null) {
-                    if (tokenizer.shift() !== null) {
-                      throw new Error("Unexpected unparsed section of file remains!");
-                    }
-                    return sections;
-                  }
-                  sections.push(section);
-                }
-              };
-              this.parseSection = function () {
-                var section = tokenizer.shift();
-                if (section === null) {
-                  return null;
-                }
-                if (!(section instanceof Section)) {
-                  throw new Error("Expected section heading; got: " + JSON.stringify(section));
-                }
-                var docstring = tokenizer.shift();
-                if (docstring instanceof SectionDocstring) {
-                  section.docstring = docstring;
-                }
-                else {
-                  tokenizer.unshift(docstring);
-                }
-                this.parseVars(section);
-                return section;
-              };
-              this.parseVars = function (section) {
-                while (true) {
-                  var variable = this.parseVar();
-                  if (variable === null) {
-                    return;
-                  }
-                  section.addVar(variable);
-                }
-              };
-              this.parseVar = function () {
-                var docstring = tokenizer.shift();
-                if (!(docstring instanceof VarDocstring)) {
-                  tokenizer.unshift(docstring);
-                  docstring = null;
-                }
-                var variable = tokenizer.shift();
-                if (variable instanceof Variable) {
-                  variable.docstring = docstring;
-                  return variable;
-                }
-                tokenizer.unshift(variable);
+            Tokenizer.prototype.unshift = function (token) {
+              if (this._next !== undefined) {
+                throw new Error("Attempted to unshift twice!");
+              }
+              this._next = token;
+            };
+            Tokenizer.prototype._shift = function () {
+              // returning null signals EOF
+              // returning undefined means the line was ignored
+              if (this._next !== undefined) {
+                var result = this._next;
+                this._next = undefined;
+                return result;
+              }
+              if (lines.length <= 0) {
                 return null;
-              };
-            }
+              }
+              var line = lines.shift();
+              var match = null;
+              match = this.CUSTOMIZABLE_HEADING.exec(line);
+              if (match !== null) {
+                return new Section(match[1], true);
+              }
+              match = this.UNCUSTOMIZABLE_HEADING.exec(line);
+              if (match !== null) {
+                return new Section(match[1], false);
+              }
+              match = this.SECTION_DOCSTRING.exec(line);
+              if (match !== null) {
+                return new SectionDocstring(match[1]);
+              }
+              match = this.VAR_DOCSTRING.exec(line);
+              if (match !== null) {
+                return new VarDocstring(match[1]);
+              }
+              var commentStart = line.lastIndexOf("//");
+              var varLine = (commentStart === -1) ? line : line.slice(0, commentStart);
+              match = this.VAR_ASSIGNMENT.exec(varLine);
+              if (match !== null) {
+                return new Variable(match[1], match[2]);
+              }
+              return undefined;
+            };
+            Tokenizer.prototype.shift = function () {
+              while (true) {
+                var result = this._shift();
+                if (result === undefined) {
+                  continue;
+                }
+                return result;
+              }
+            };
+            var tokenizer = new Tokenizer();
+            function Parser() {}
+            Parser.prototype.parseFile = function () {
+              var sections = [];
+              while (true) {
+                var section = this.parseSection();
+                if (section === null) {
+                  if (tokenizer.shift() !== null) {
+                    throw new Error("Unexpected unparsed section of file remains!");
+                  }
+                  return sections;
+                }
+                sections.push(section);
+              }
+            };
+            Parser.prototype.parseSection = function () {
+              var section = tokenizer.shift();
+              if (section === null) {
+                return null;
+              }
+              if (!(section instanceof Section)) {
+                throw new Error("Expected section heading; got: " + JSON.stringify(section));
+              }
+              var docstring = tokenizer.shift();
+              if (docstring instanceof SectionDocstring) {
+                section.docstring = docstring;
+              }
+              else {
+                tokenizer.unshift(docstring);
+              }
+              this.parseVars(section);
+              return section;
+            };
+            Parser.prototype.parseVars = function (section) {
+              while (true) {
+                var variable = this.parseVar();
+                if (variable === null) {
+                  return;
+                }
+                section.addVar(variable);
+              }
+            };
+            Parser.prototype.parseVar = function () {
+              var docstring = tokenizer.shift();
+              if (!(docstring instanceof VarDocstring)) {
+                tokenizer.unshift(docstring);
+                docstring = null;
+              }
+              var variable = tokenizer.shift();
+              if (variable instanceof Variable) {
+                variable.docstring = docstring;
+                return variable;
+              }
+              tokenizer.unshift(variable);
+              return null;
+            };
 
             return {sections: (new Parser()).parseFile()};
           }
